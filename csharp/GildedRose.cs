@@ -1,89 +1,98 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 
 namespace csharp
 {
     public class GildedRose
     {
         IList<Item> Items;
-        public GildedRose(IList<Item> Items)
+
+        public GildedRose(IList<Item> items)
         {
-            this.Items = Items;
+            this.Items = items;
         }
 
         public void UpdateQuality()
         {
-            for (var i = 0; i < Items.Count; i++)
+            UpdateAllQuality(Items);
+            UpdateAllSellIn(Items);
+        }
+
+        private static void UpdateAllQuality(IList<Item> items)
+        {
+            foreach (var item in items)
             {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                {
-                    if (Items[i].Quality > 0)
-                    {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                        {
-                            Items[i].Quality = Items[i].Quality - 1;
-                        }
-                    }
-                }
-                else
-                {
-                    if (Items[i].Quality < 50)
-                    {
-                        Items[i].Quality = Items[i].Quality + 1;
+                if (item.Name.Contains("Sulfuras"))
+                    continue;
+                if (item.Name.Contains("Conjured"))
+                    UpdateConjuredQuality(item);
+                else if (!item.Name.Contains("Sulfuras"))
+                    UpdateQuality(item);
+            }
+        }
 
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].SellIn < 11)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
+        private static void UpdateQuality(Item item)
+        {
+            if (item.Name.Contains("Aged Brie"))
+                UpdateBrieQuality(item);
+            else if (item.Name.Contains("Backstage passes"))
+                UpdatePassesQuality(item);
+            else
+                NormalUpdateQuality(item);
 
-                            if (Items[i].SellIn < 6)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-                        }
-                    }
-                }
+            ApplyQualityConstrains(item, 0, 50);
+        }
 
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                {
-                    Items[i].SellIn = Items[i].SellIn - 1;
-                }
+        private static void NormalUpdateQuality(Item item)
+        {
+            item.Quality = item.SellIn > 0 ? item.Quality - 1 : item.Quality - 2;
+        }
 
-                if (Items[i].SellIn < 0)
-                {
-                    if (Items[i].Name != "Aged Brie")
-                    {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
-                        }
-                    }
-                    else
-                    {
-                        if (Items[i].Quality < 50)
-                        {
-                            Items[i].Quality = Items[i].Quality + 1;
-                        }
-                    }
-                }
+        private static void UpdateConjuredQuality(Item item)
+        {
+            UpdateQuality(item);
+            UpdateQuality(item);
+        }
+
+        private static void UpdateBrieQuality(Item item)
+        {
+            item.Quality = item.SellIn > 0 ? item.Quality + 1 : item.Quality + 2;
+        }
+
+        private static void UpdatePassesQuality(Item item)
+        {
+            if (item.SellIn > 10)
+                item.Quality = item.Quality + 1;
+            else if (item.SellIn > 5)
+                item.Quality = item.Quality + 2;
+            else if (item.SellIn > 0)
+                item.Quality = item.Quality + 3;
+            else 
+                item.Quality = 0;
+        }
+
+        private static void UpdateAllSellIn(IList<Item> items)
+        {
+            foreach (var item in items)
+            {
+                UpdateSellIn(item);
+            }
+        }
+
+        private static void ApplyQualityConstrains(Item item, int lower, int upper)
+        {
+            item.Quality = item.Quality > upper ? upper : item.Quality;
+            item.Quality = item.Quality < lower ? lower : item.Quality;
+        }
+
+        private static void UpdateSellIn(Item item)
+        {
+            if (!item.Name.Contains("Sulfuras"))
+            {
+                item.SellIn -= 1;
             }
         }
     }
+
+    
 }

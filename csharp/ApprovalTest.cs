@@ -11,7 +11,6 @@ namespace csharp
     [UseReporter(typeof(NUnitReporter))]
     public class ApprovalTest
     {
-        [Test]
         public void ThirtyDays()
         {
             StringBuilder fakeoutput = new StringBuilder();
@@ -20,6 +19,9 @@ namespace csharp
 
             Program.Main(new string[] { });
             String output = fakeoutput.ToString();
+
+            string expectedOutput;
+
             Approvals.Verify(output);
         }
     }
